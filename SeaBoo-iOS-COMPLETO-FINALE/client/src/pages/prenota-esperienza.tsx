@@ -105,7 +105,8 @@ export default function PrenotaEsperienza() {
       };
 
       // Create Stripe payment intent for experience
-        const response = await fetch(getApiUrl('/api/create-experience-payment'), {        method: 'POST',
+        const response = await fetch(getApiUrl('/api/create-experience-payment'), {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
