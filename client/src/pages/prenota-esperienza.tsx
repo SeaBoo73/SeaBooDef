@@ -13,7 +13,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
-import { getApiUrl } from "@/lib/queryClient";
 import { 
   ArrowLeft,
   Calendar as CalendarIcon,
