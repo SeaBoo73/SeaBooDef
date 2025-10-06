@@ -13,10 +13,8 @@ import { ArrowLeft } from "lucide-react";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
-// Stripe temporaneamente disabilitato per test App Store
-const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
-  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
-  : null;
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_51RmJeyRemNUXGzu7lcts67FtOOZFuYrqUSvhjCQTNrZyEgAB1051AqnVSzM0jXsDcMeWGThb3JNdMXGFAzj06GbU004axe6Kek';
+const stripePromise = loadStripe(stripeKey);
 
 const CheckoutForm = () => {
   const stripe = useStripe();
