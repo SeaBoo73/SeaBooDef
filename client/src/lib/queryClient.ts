@@ -1,7 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 // API base URL - usa il backend Replit in produzione, locale in dev
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://boat-rental-stefanoconsulti.replit.app";
 
 // Helper function to get full API URL
 export function getApiUrl(path: string): string {
