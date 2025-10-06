@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/queryClient";
 import { 
   ArrowLeft,
   Calendar as CalendarIcon,
@@ -104,7 +105,7 @@ export default function PrenotaEsperienza() {
       };
 
       // Create Stripe payment intent for experience
-      const response = await fetch('/api/create-experience-payment', {
+      const response = await fetch(getApiUrl('/api/create-experience-payment'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

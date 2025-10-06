@@ -3,6 +3,14 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 // API base URL - usa il backend Replit in produzione, locale in dev
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
+// Helper function to get full API URL
+export function getApiUrl(path: string): string {
+  if (!path.startsWith('/')) {
+    return path; // Already a full URL
+  }
+  return `${API_BASE_URL}${path}`;
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const clonedRes = res.clone();

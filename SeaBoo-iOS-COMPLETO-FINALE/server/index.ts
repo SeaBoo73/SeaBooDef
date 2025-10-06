@@ -16,38 +16,46 @@ app.use((req, _res, next) => {
 });
 
 // Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-08-27.basil",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 // === API (PRIMA di registerRoutes/serveStatic) ===
-app.get("/api/healthz", (_req, res) => res.json({ ok: true })); // test veloce
+app.get("/api/healthz", (_req, res) => res.json({ ok: true })); // test
 
-app.post(
-  "/api/create-experience-payment",
-  async (req: Request, res: Response) => {
-    try {
-      const amount = Number(req.body?.amount);
-      const currency = String(req.body?.currency || "eur");
-      if (!process.env.STRIPE_SECRET_KEY)
-        return res.status(500).json({ error: "missing_secret" });
-      if (!Number.isFinite(amount) || amount <= 0)
-        return res.status(400).json({ error: "bad_amount" });
+// Unico handler riusabile
+console.log("[PAY] handler HIT", req.method, req.path);
+const createPaymentHandler = async (req: Request, res: Response) => {
+  try {
+    const amount = Number(req.body?.amount);
+    const currency = String(req.body?.currency || "eur");
+    if (!process.env.STRIPE_SECRET_KEY)
+      return res.status(500).json({ error: "missing_secret" });
+    if (!Number.isFinite(amount) || amount <= 0)
+      return res.status(400).json({ error: "bad_amount" });
 
-      const intent = await stripe.paymentIntents.create({
-        amount, // es. 1000 = €10,00
-        currency, // es. 'eur'
-        automatic_payment_methods: { enabled: true },
-        description: "SeaBoo experience",
-      });
+    const intent = await stripe.paymentIntents.create({
+      amount, // es. 1000 = €10,00
+      currency,
+      automatic_payment_methods: { enabled: true },
+      description: "SeaBoo experience",
+    });
 
-      return res.json({ clientSecret: intent.client_secret });
-    } catch (e: any) {
-      console.error("[PAY][SERVER-ERR]", e?.message || e);
-      return res.status(500).json({ error: "stripe_failed" });
-    }
-  },
-);
+    // Rispondi con entrambe le chiavi (compatibilità col client)
+    return res.json({
+      client_secret: intent.client_secret,
+      clientSecret: intent.client_secret,
+    });
+  } catch (e: any) {
+    console.error("[PAY][SERVER-ERR]", e?.message || e);
+    return res.status(500).json({ error: "stripe_failed" });
+  }
+};
+
+// Rotta "nuova"
+app.post("/api/create-experience-payment", createPaymentHandler);
+
+// ✅ Alias sulla rotta che usa l'app iOS
+app.all("/api/payments/create-payment-intent", createPaymentHandler);
+
 
 // routing/statici DOPO le API
 (async () => {
