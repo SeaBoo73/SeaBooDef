@@ -156,11 +156,11 @@ export default function ProfiloPage() {
           <CardContent className="pt-6">
             <div className="flex items-center space-x-4">
               <div className="h-16 w-16 bg-ocean-blue rounded-full flex items-center justify-center text-white text-xl font-bold">
-                {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}{user.lastName?.charAt(0) || ''}
               </div>
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-gray-900">
-                  {user.firstName} {user.lastName}
+                  {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email}
                 </h1>
                 <p className="text-gray-600">{user.email}</p>
                 <div className="flex items-center mt-2 text-sm text-gray-500">
