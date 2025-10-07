@@ -1,0 +1,29 @@
+vite v5.4.19 building for production...
+✓ 3642 modules transformed.
+../dist/public/index.html                                                                          4.85 kB │ gzip:   1.62 kB
+../dist/public/assets/OIP (1)_1752921317486-oR66wzX5.webp                                         16.99 kB
+../dist/public/assets/OIP_1752919948843-GQNGEtPv.webp                                             24.87 kB
+../dist/public/assets/WhatsApp Image 2025-08-19 at 12.38.33_1757318764148-1h9XhvIH.jpeg           60.59 kB
+../dist/public/assets/gommone senza patente_1752875806367-5EXf0KWG.webp                          107.95 kB
+../dist/public/assets/HD-wallpaper-sailing-boat-beach-nature-trees_1753081381507-DBAdy4zh.jpg    138.05 kB
+../dist/public/assets/WhatsApp Image 2025-06-15 at 23.38.19_1752875703213-B6I0r5-Z.jpeg          155.00 kB
+../dist/public/assets/WhatsApp Image 2025-06-12 at 20.22.10_1752876155096-DMM_5ou9.jpeg          210.69 kB
+../dist/public/assets/R (1)_1752920495156-BFVt9hqA.jpg                                           247.77 kB
+../dist/public/assets/barca a vela ludovica_1752876195081-CM-7qUcH.jpg                           360.92 kB
+../dist/public/assets/caiacco_1753599016775-CWs-5fuJ.jpg                                         717.68 kB
+../dist/public/assets/ChatGPT Image 7 ago 2025_ 07_13_19_1754544753003-h-q9-Jbz.png              926.36 kB
+../dist/public/assets/catamarano ludovica_1752876117442-Bi0QKlim.jpg                           1,236.62 kB
+../dist/public/assets/index-DJUeoY0L.css                                                         107.55 kB │ gzip:  17.34 kB
+../dist/public/assets/come-funziona-j8vavZhH.js                                                    2.17 kB │ gzip:   0.73 kB
+../dist/public/assets/mappa-completa-DtEPrTjz.js                                                   4.00 kB │ gzip:   1.26 kB
+../dist/public/assets/admin-dashboard-CCdvo9dt.js                                                  6.70 kB │ gzip:   1.86 kB
+../dist/public/assets/test-moorings-Du-OEtC5.js                                                   14.21 kB │ gzip:   3.97 kB
+../dist/public/assets/analytics-dashboard-3bEIf7M5.js                                             49.87 kB │ gzip:  12.64 kB
+../dist/public/assets/index-DiPvlz8d.js                                                        1,786.55 kB │ gzip: 459.98 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.79s
+chiaraindino@MacBook-Pro-di-chiara-3 02-SEABOO-DEF % 
