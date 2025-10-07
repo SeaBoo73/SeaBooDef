@@ -1,0 +1,23 @@
+Failed to resolve host network app id to config: bundleID: com.apple.WebKit.Networking instance ID: Optional([_EXExtensionInstanceIdentifier: A4C3677F-195F-4309-B6C3-290F18634529])
+⚡️  Loading app at capacitor://localhost...
+GPU process (0x115061b00) took 2.159104 seconds to launch
+⚡️  [log] - Current state - selectedCategory:  URL: 
+nw_connection_copy_connected_local_endpoint_block_invoke [C1] Connection has no local endpoint
+nw_connection_copy_connected_local_endpoint_block_invoke [C1] Connection has no local endpoint
+⚡️  WebView loaded
+⚡️  [log] - Current state - selectedCategory:  URL: 
+⚡️  [log] - Current state - selectedCategory:  URL: 
+⚡️  [error] - {}
+⚡️  [log] - Error caught by boundary: {} {"componentStack":"\nQce@capacitor://localhost/assets/index-Cu4XzhxN.js:685:16251\nCe@capacitor://localhost/assets/index-Cu4XzhxN.js:48:3285\nfm@capacitor://localhost/assets/index-Cu4XzhxN.js:638:24911\nmY@capacitor://localhost/assets/index-Cu4XzhxN.js:48:4130\ncIe\nsZ@capacitor://localhost/assets/index-Cu4XzhxN.js:638:23284\nMY@capacitor://localhost/assets/index-Cu4XzhxN.js:48:41267\nZie@capacitor://localhost/assets/index-Cu4XzhxN.js:678:240723\ndIe"}
+⚡️  [log] - Current state - selectedCategory:  URL: 
+⚡️  WebView loaded
+⚡️  [log] - Current state - selectedCategory:  URL: 
+⚡️  [log] - Current state - selectedCategory:  URL: 
+⚡️  [log] - PROFILO VERSION 2.0
+⚡️  [error] - {}
+⚡️  [log] - Error caught by boundary: {} {"componentStack":"\nQce@capacitor://localhost/assets/index-Cu4XzhxN.js:685:16251\nCe@capacitor://localhost/assets/index-Cu4XzhxN.js:48:3285\nfm@capacitor://localhost/assets/index-Cu4XzhxN.js:638:24911\nmY@capacitor://localhost/assets/index-Cu4XzhxN.js:48:4130\ncIe\nsZ@capacitor://localhost/assets/index-Cu4XzhxN.js:638:23284\nMY@capacitor://localhost/assets/index-Cu4XzhxN.js:48:41267\nZie@capacitor://localhost/assets/index-Cu4XzhxN.js:678:240723\ndIe"}
+⚡️  [log] - Current state - selectedCategory:  URL: 
+⚡️  WebView loaded
+⚡️  [log] - Current state - selectedCategory:  URL: 
+⚡️  [log] - Current state - selectedCategory:  URL: 
+⚡️  [log] - PROFILO VERSION 2.0
