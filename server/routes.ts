@@ -153,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current user endpoint
   app.get('/api/user', (req, res) => {
     if (req.session?.user) {
-      res.json({ user: req.session.user });
+      res.json(req.session.user);
     } else {
       res.status(401).json({ error: "Non autenticato" });
     }

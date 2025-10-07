@@ -1,4 +1,4 @@
-import { useState } from "react";
+oimport { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
