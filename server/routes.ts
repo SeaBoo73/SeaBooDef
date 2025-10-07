@@ -139,6 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          role: user.role || "customer",
           userType: user.role === "owner" ? "owner" : "customer"
         }
       });
