@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Booking, Boat, Favorite } from "@shared/schema";
+import { Booking, Boat } from "@shared/schema";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { ChatButton } from "@/components/chat-button";
@@ -57,17 +57,12 @@ export default function CustomerDashboard() {
     enabled: !!user,
   });
 
-  // Fetch user's favorites
-  const { data: favorites = [], isLoading: favoritesLoading } = useQuery<Favorite[]>({
-    queryKey: ["/api/favorites"],
-    enabled: !!user,
-  });
+  // TODO: Fetch user's favorites (table not yet created)
+  const favorites: any[] = [];
+  const favoritesLoading = false;
 
-  // Fetch boats for favorites
-  const { data: boats = [] } = useQuery<Boat[]>({
-    queryKey: ["/api/boats"],
-    enabled: !!user && favorites.length > 0,
-  });
+  // TODO: Fetch boats for favorites (disabled until favorites table exists)
+  const boats: Boat[] = [];
 
   const getBookingStatusBadge = (status: string) => {
     switch (status) {
@@ -139,8 +134,12 @@ export default function CustomerDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">Ciao, {user.firstName || user.username}!</h1>
           <p className="text-gray-600 mt-2">Gestisci le tue prenotazioni e scopri nuove avventure</p>
           <div className="mt-4">
-            <Button variant="outline" className="border-coral text-coral hover:bg-coral hover:text-white" asChild>
-              <Link href="/diventa-noleggiatore">Vuoi diventare noleggiatore?</Link>
+            <Button 
+              variant="outline" 
+              className="border-coral text-coral hover:bg-coral hover:text-white"
+              onClick={() => setLocation("/diventa-noleggiatore")}
+            >
+              Vuoi diventare noleggiatore?
             </Button>
           </div>
         </div>
@@ -250,9 +249,9 @@ export default function CustomerDashboard() {
                             </div>
                           </div>
 
-                          {booking.notes && (
+                          {booking.specialRequests && (
                             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                              <p className="text-sm text-gray-700"><strong>Note:</strong> {booking.notes}</p>
+                              <p className="text-sm text-gray-700"><strong>Note:</strong> {booking.specialRequests}</p>
                             </div>
                           )}
                         </div>
@@ -330,11 +329,11 @@ export default function CustomerDashboard() {
                       <div className="space-y-1 text-sm text-gray-600 mb-3">
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-1" />
-                          {boat.port}
+                          {boat.location}
                         </div>
                         <div className="flex items-center">
                           <Users className="h-4 w-4 mr-1" />
-                          Fino a {boat.maxPersons} persone
+                          Fino a {boat.capacity} persone
                         </div>
                       </div>
                       
