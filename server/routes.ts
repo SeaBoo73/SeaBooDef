@@ -170,6 +170,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Delete account endpoint (Apple requirement)
+  app.delete('/api/users/me', requireAuth, async (req: any, res) => {
+    try {
+      const { password } = req.body;
+      const userId = parseInt(req.session.user.id);
+
+      // Get user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "Utente non trovato" });
+      }
+
+      // Verify password for security
+      const isPasswordValid = await storage.verifyPassword(user.email, password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: "Password non corretta" });
+      }
+
+      // Delete Stripe customer if exists
+      if (user.stripeCustomerId) {
+        try {
+          await stripe.customers.del(user.stripeCustomerId);
+        } catch (stripeError) {
+          console.error("Error deleting Stripe customer:", stripeError);
+          // Continue anyway - don't block account deletion
+        }
+      }
+
+      // Delete user (cascade deletes bookings)
+      await storage.deleteUser(userId);
+
+      // Destroy session
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+        }
+      });
+
+      res.json({ success: true, message: "Account eliminato con successo" });
+    } catch (error: any) {
+      console.error("Delete account error:", error);
+      res.status(500).json({ 
+        error: error.message || "Errore durante l'eliminazione dell'account" 
+      });
+    }
+  });
+
   // Apple Sign In callback endpoint
   app.post('/auth/apple/callback', async (req, res) => {
     try {

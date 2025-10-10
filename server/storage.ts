@@ -24,6 +24,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   verifyPassword(email: string, password: string): Promise<User | null>;
+  deleteUser(id: number): Promise<boolean>;
   sessionStore: session.Store;
   
   // Boat operations
@@ -89,6 +90,15 @@ export class DatabaseStorage implements IStorage {
 
     const isValid = await bcrypt.compare(password, user.password);
     return isValid ? user : null;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    // Delete user's bookings first (cascade)
+    await db.delete(bookings).where(eq(bookings.customerId, id.toString()));
+    
+    // Delete user
+    const result = await db.delete(users).where(eq(users.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Boat operations
