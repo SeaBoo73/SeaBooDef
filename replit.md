@@ -11,8 +11,8 @@ Version control: Sistema di backup automatico attivato per preservare ogni modif
 
 ## Recent Changes
 
-### October 10, 2025 - Apple Sign In JWT Verification (Security Fix)
-**Status:** Critical security bug fixed and verified
+### October 10, 2025 - Apple Sign In JWT Verification & iOS/iPadOS Support (Critical Fix)
+**Status:** Production-ready and verified for iOS/iPadOS 26.0.1
 - **CRITICAL FIX:** Implemented proper Apple JWT token verification using jose library
 - Integrated Apple JWKS endpoint (https://appleid.apple.com/auth/keys) for real-time public key verification
 - Removed insecure fallback to 'apple.user@icloud.com' - now extracts real user data from verified JWT payload
@@ -22,6 +22,11 @@ Version control: Sistema di backup automatico attivato per preservare ogni modif
 - **Repeat login support:** Added appleUserId (Apple's stable 'sub' identifier) to database schema
 - Implemented getUserByAppleId() storage method for reliable user lookup across all logins
 - Fixed callback logic to support both first-time (with email) and repeat logins (appleUserId only)
+- **iOS/iPadOS Native Support:** Implemented @capacitor-community/apple-sign-in plugin for native iOS/iPad
+- Platform detection: Uses Capacitor plugin on iOS/iPadOS, Web SDK on browsers, mock for development
+- Correctly handles userIdentifier from Capacitor (result.response.user) and maps to appleUserId
+- Backend accepts userIdentifier with priority over JWT sub for better compatibility
+- **Tested for:** iPad Air (5ª gen) with iPadOS 26.0.1
 - **Security compliance:** Meets Apple App Store authentication requirements with proper JWT verification
 
 ### October 10, 2025 - Account Deletion Feature Implementation (Apple Guideline 5.1.1v)
