@@ -86,8 +86,8 @@ export const boats = pgTable("boats", {
 // Bookings table
 export const bookings = pgTable("bookings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  customerId: varchar("customer_id").references(() => users.id).notNull(),
-  boatId: varchar("boat_id").references(() => boats.id).notNull(),
+  customerId: integer("customer_id").references(() => users.id).notNull(),
+  boatId: integer("boat_id").references(() => boats.id).notNull(),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   totalPrice: varchar("total_price", { length: 20 }),

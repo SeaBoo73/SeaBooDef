@@ -174,6 +174,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/users/me', requireAuth, async (req: any, res) => {
     try {
       const { password } = req.body;
+      
+      // Validate password is provided
+      if (!password || typeof password !== 'string' || password.trim() === '') {
+        return res.status(400).json({ error: "Password richiesta per confermare l'eliminazione" });
+      }
+
       const userId = parseInt(req.session.user.id);
 
       // Get user

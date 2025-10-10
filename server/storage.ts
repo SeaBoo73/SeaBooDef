@@ -94,7 +94,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: number): Promise<boolean> {
     // Delete user's bookings first (cascade)
-    await db.delete(bookings).where(eq(bookings.customerId, id.toString()));
+    await db.delete(bookings).where(eq(bookings.customerId, id));
     
     // Delete user
     const result = await db.delete(users).where(eq(users.id, id));
@@ -156,7 +156,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBookingsByCustomer(customerId: number): Promise<Booking[]> {
-    return await db.select().from(bookings).where(eq(bookings.customerId, customerId.toString()));
+    return await db.select().from(bookings).where(eq(bookings.customerId, customerId));
   }
 
   async createBooking(bookingData: InsertBooking): Promise<Booking> {
