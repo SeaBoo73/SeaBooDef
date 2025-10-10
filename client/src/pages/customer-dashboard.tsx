@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -9,6 +9,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Booking, Boat } from "@shared/schema";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -28,13 +40,19 @@ import {
   Phone,
   Ship,
   TrendingUp,
-  ArrowLeft
+  ArrowLeft,
+  Trash2
 } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CustomerDashboard() {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const { toast } = useToast();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
 
   // Get tab from URL parameter
   const urlParams = new URLSearchParams(window.location.search);
@@ -63,6 +81,48 @@ export default function CustomerDashboard() {
 
   // TODO: Fetch boats for favorites (disabled until favorites table exists)
   const boats: Boat[] = [];
+
+  // Delete account mutation
+  const deleteAccountMutation = useMutation({
+    mutationFn: async (password: string) => {
+      return await apiRequest('/api/users/me', {
+        method: 'DELETE',
+        body: JSON.stringify({ password }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account eliminato",
+        description: "Il tuo account è stato eliminato con successo",
+      });
+      // Redirect to home after a short delay
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Errore",
+        description: error.message || "Non è stato possibile eliminare l'account",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteAccount = () => {
+    if (!deletePassword) {
+      toast({
+        title: "Password richiesta",
+        description: "Inserisci la tua password per confermare",
+        variant: "destructive",
+      });
+      return;
+    }
+    deleteAccountMutation.mutate(deletePassword);
+  };
 
   const getBookingStatusBadge = (status: string) => {
     switch (status) {
@@ -412,8 +472,16 @@ export default function CustomerDashboard() {
                   </div>
                 </div>
                 
-                <div className="pt-4">
+                <div className="pt-4 flex gap-3">
                   <Button variant="outline">Modifica profilo</Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => setShowDeleteDialog(true)}
+                    data-testid="button-delete-account"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Elimina account
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -432,6 +500,51 @@ export default function CustomerDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Account Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sei sicuro di voler eliminare il tuo account?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p>
+                Questa azione è permanente e non può essere annullata. Tutti i tuoi dati, 
+                prenotazioni e informazioni personali saranno eliminati definitivamente.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="delete-password">Inserisci la tua password per confermare:</Label>
+                <Input
+                  id="delete-password"
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Password"
+                  data-testid="input-delete-password"
+                />
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setDeletePassword("");
+                setShowDeleteDialog(false);
+              }}
+              data-testid="button-cancel-delete"
+            >
+              Annulla
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={deleteAccountMutation.isPending}
+              className="bg-red-600 hover:bg-red-700"
+              data-testid="button-confirm-delete"
+            >
+              {deleteAccountMutation.isPending ? "Eliminazione..." : "Elimina account"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>
