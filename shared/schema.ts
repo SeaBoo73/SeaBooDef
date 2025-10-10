@@ -33,6 +33,7 @@ export const users = pgTable("users", {
   password: varchar("password", { length: 255 }).notNull(),
   role: varchar("role", { length: 20 }).default("customer"), // 'customer', 'owner', or 'admin'
   authProvider: varchar("auth_provider", { length: 20 }).default("email"), // 'email' or 'apple'
+  appleUserId: varchar("apple_user_id", { length: 255 }).unique(), // Apple's stable 'sub' identifier
   firstName: varchar("first_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }),
   phone: varchar("phone", { length: 20 }),

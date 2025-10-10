@@ -259,11 +259,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payload = await verifyAppleToken(id_token);
       
       // Extract user data from verified JWT payload
-      const email = payload.email as string;
-      const appleUserId = payload.sub as string; // Apple's unique user identifier
+      const appleUserId = payload.sub as string; // Apple's stable unique identifier
+      const email = payload.email as string | undefined; // Only present on first sign-in
       
-      if (!email) {
-        return res.status(400).json({ error: "Email non trovata nel token Apple" });
+      if (!appleUserId) {
+        return res.status(400).json({ error: "ID utente Apple mancante" });
       }
 
       // Use user_info from Apple (only available on first sign-in)
@@ -274,23 +274,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName = user_info.name.firstName || '';
         lastName = user_info.name.lastName || '';
       }
-      // Note: Apple only sends user_info on first sign-in
-      // On subsequent logins, firstName/lastName will be empty
-      // User can update their profile later if needed
 
-      // Check if user already exists
-      let user = await storage.getUserByEmail(email);
+      // Find user by Apple ID (works for all logins)
+      let user = await storage.getUserByAppleId(appleUserId);
+
+      // If not found by Apple ID, try email (first sign-in scenario)
+      if (!user && email) {
+        user = await storage.getUserByEmail(email);
+      }
 
       if (!user) {
-        // Crea nuovo utente
-        const username = email.split('@')[0];
+        // Create new user - use email if available, otherwise placeholder
+        const userEmail = email || `${appleUserId}@privaterelay.appleid.com`;
+        const username = userEmail.split('@')[0];
         const userData = {
-          email,
+          email: userEmail,
           username,
           password: await import('bcryptjs').then(bcrypt => 
             bcrypt.hash(id_token + Date.now(), 12)
-          ), // Password casuale per utenti Apple
-          authProvider: 'apple' as const, // Mark as Apple Sign In user
+          ), // Random password for Apple users
+          authProvider: 'apple' as const,
+          appleUserId, // Save Apple's stable identifier
           firstName,
           lastName,
           role: 'customer' as const,
