@@ -255,12 +255,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Token Apple mancante" });
       }
 
+      console.log('🍎 Apple Sign In callback - user_info:', user_info ? 'present' : 'missing');
+
       // Verify Apple JWT token
       const payload = await verifyAppleToken(id_token);
       
       // Extract user data from verified JWT payload
-      const appleUserId = payload.sub as string; // Apple's stable unique identifier
-      const email = payload.email as string | undefined; // Only present on first sign-in
+      // Priority: 1) userIdentifier from Capacitor, 2) sub from JWT
+      const appleUserId = (user_info?.userIdentifier || payload.sub) as string;
+      const email = (user_info?.email || payload.email) as string | undefined;
+      
+      console.log('🔑 Apple User ID:', appleUserId, 'Email:', email ? 'present' : 'missing');
       
       if (!appleUserId) {
         return res.status(400).json({ error: "ID utente Apple mancante" });

@@ -15,6 +15,8 @@ import { Redirect, Link, useLocation } from "wouter";
 import { Anchor, ArrowLeft } from "lucide-react";
 import seabooLogo from "@assets/WhatsApp Image 2025-08-19 at 12.38.33_1757318764148.jpeg";
 import { useToast } from "@/hooks/use-toast";
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+import { Capacitor } from '@capacitor/core';
 
 const loginSchema = z.object({
   email: z.string().email("Email non valida"),
@@ -103,87 +105,77 @@ export default function AuthPage() {
 
   const handleAppleSignIn = async () => {
     try {
-      // Check if we're in review mode or development mode
-      const isReviewMode = import.meta.env.VITE_REVIEW_MODE === 'true' || 
-                          window.location.hostname.includes('replit') ||
-                          window.location.hostname.includes('localhost');
+      const isNative = Capacitor.isNativePlatform();
+      const platform = Capacitor.getPlatform();
+      
+      console.log('🚀 Apple Sign In - Platform:', platform, 'isNative:', isNative);
 
-      console.log('🚀 handleAppleSignIn avviato isReview =', isReviewMode, 'VITE_REVIEW_MODE =', import.meta.env.VITE_REVIEW_MODE);
+      if (isNative && platform === 'ios') {
+        // iOS/iPadOS native - Use Capacitor plugin
+        console.log('📱 Using Capacitor Apple Sign In plugin for iOS/iPadOS');
+        
+        const result = await SignInWithApple.authorize({
+          clientId: 'it.seaboo.app',
+          redirectURI: 'https://boat-rental-stefanoconsulti.replit.app/auth/apple/callback',
+          scopes: 'email name',
+          state: Math.random().toString(36).substring(7),
+          nonce: Math.random().toString(36).substring(2, 15),
+        });
 
-      if (isReviewMode) {
-        // For Apple Review or development testing: simulate Apple ID token
+        console.log('✅ Capacitor Apple Sign In response:', result);
+
+        // Map Capacitor response to backend format
+        const appleData = {
+          id_token: result.response.identityToken,
+          user_info: {
+            userIdentifier: result.response.user, // Apple's stable user ID
+            email: result.response.email,
+            name: {
+              firstName: result.response.givenName || '',
+              lastName: result.response.familyName || ''
+            }
+          }
+        };
+
+        console.log('📤 Sending to backend:', { ...appleData, id_token: '***' });
+        appleLoginMutation.mutate(appleData);
+
+      } else if (typeof window !== 'undefined' && window.AppleID) {
+        // Web browser - Use Web SDK
+        console.log('🌐 Using Web SDK for Apple Sign In');
+        
+        const response = await window.AppleID.auth.signIn();
+        
+        appleLoginMutation.mutate({
+          id_token: response.authorization.id_token,
+          user_info: response.user
+        });
+      } else {
+        // Development/testing fallback
+        console.log('🧪 Development mode - using mock Apple Sign In');
+        
         const mockAppleData = {
           id_token: 'mock_apple_id_token_' + Date.now(),
           user_info: {
+            userIdentifier: 'mock_user_' + Date.now(),
+            email: 'apple.user@icloud.com',
             name: {
               firstName: 'Apple',
               lastName: 'User'
-            },
-            email: 'apple.user@icloud.com'
+            }
           }
         };
         
-        console.log('✅ Using mock Apple Sign In for review/development mode');
-        
-        // Aggiungi un piccolo delay per simulare la rete
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
         appleLoginMutation.mutate(mockAppleData);
-      } else {
-        // Real Apple Sign In for production
-        console.log('🔄 Attempting real Apple Sign In...');
-        
-        if (typeof window !== 'undefined' && window.AppleID) {
-          const response = await window.AppleID.auth.signIn();
-          
-          console.log('✅ Apple Sign In successful, processing...');
-          appleLoginMutation.mutate({
-            id_token: response.authorization.id_token,
-            user_info: response.user
-          });
-        } else {
-          console.warn('⚠️ Apple ID SDK not available');
-          toast({
-            title: "Apple Sign In non disponibile",
-            description: "L'SDK Apple non è caricato. Prova con email e password.",
-            variant: "destructive",
-          });
-        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Apple Sign In error:', error);
       
-      // Gestione specifica per errori WebKit/Network
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('network') || errorMessage.includes('WebKit')) {
-        console.log('🔄 Detected WebKit network error, retrying with mock...');
-        
-        // In caso di errore di rete WebKit, fallback al mock
-        const mockAppleData = {
-          id_token: 'mock_apple_id_token_fallback_' + Date.now(),
-          user_info: {
-            name: {
-              firstName: 'Apple',
-              lastName: 'User'
-            },
-            email: 'apple.user@icloud.com'
-          }
-        };
-        
-        appleLoginMutation.mutate(mockAppleData);
-        
-        toast({
-          title: "Accesso completato",
-          description: "Connessione effettuata con successo",
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "Errore Apple Sign In",
-          description: "Impossibile completare l'accesso con Apple. Prova con email e password.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Errore Apple Sign In",
+        description: error.message || "Impossibile completare l'accesso con Apple",
+        variant: "destructive",
+      });
     }
   };
 
