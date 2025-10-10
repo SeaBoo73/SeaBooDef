@@ -174,12 +174,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/users/me', requireAuth, async (req: any, res) => {
     try {
       const { password } = req.body;
-      
-      // Validate password is provided
-      if (!password || typeof password !== 'string' || password.trim() === '') {
-        return res.status(400).json({ error: "Password richiesta per confermare l'eliminazione" });
-      }
-
       const userId = parseInt(req.session.user.id);
 
       // Get user
@@ -188,11 +182,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Utente non trovato" });
       }
 
-      // Verify password for security
-      const isPasswordValid = await storage.verifyPassword(user.email, password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: "Password non corretta" });
+      // For email users, verify password for security
+      if (user.authProvider === 'email') {
+        if (!password || typeof password !== 'string' || password.trim() === '') {
+          return res.status(400).json({ error: "Password richiesta per confermare l'eliminazione" });
+        }
+        
+        const isPasswordValid = await storage.verifyPassword(user.email, password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ error: "Password non corretta" });
+        }
       }
+      // Apple Sign In users don't need password (they don't have one)
 
       // Delete Stripe customer if exists
       if (user.stripeCustomerId) {
@@ -264,6 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           password: await import('bcryptjs').then(bcrypt => 
             bcrypt.hash(id_token + Date.now(), 12)
           ), // Password casuale per utenti Apple
+          authProvider: 'apple' as const, // Mark as Apple Sign In user
           firstName,
           lastName,
           role: 'customer' as const,

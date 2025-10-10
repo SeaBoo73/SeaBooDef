@@ -76,7 +76,10 @@ export default function ProfiloPage() {
   });
 
   const handleDeleteAccount = () => {
-    if (!deletePassword) {
+    if (!user) return;
+    
+    // For email users, require password
+    if (user.authProvider === 'email' && !deletePassword) {
       toast({
         title: "Errore",
         description: "Inserisci la password per confermare",
@@ -84,6 +87,7 @@ export default function ProfiloPage() {
       });
       return;
     }
+    // For Apple users, password is empty (not required)
     deleteAccountMutation.mutate(deletePassword);
   };
 
@@ -391,16 +395,25 @@ export default function ProfiloPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">
-            <Label htmlFor="delete-password">Conferma con la tua password</Label>
-            <Input
-              id="delete-password"
-              type="password"
-              placeholder="Inserisci la tua password"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-              className="mt-2"
-              data-testid="input-delete-password"
-            />
+            {user?.authProvider === 'email' && (
+              <>
+                <Label htmlFor="delete-password">Conferma con la tua password</Label>
+                <Input
+                  id="delete-password"
+                  type="password"
+                  placeholder="Inserisci la tua password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className="mt-2"
+                  data-testid="input-delete-password"
+                />
+              </>
+            )}
+            {user?.authProvider === 'apple' && (
+              <p className="text-sm text-gray-600">
+                Il tuo account è collegato a Sign in with Apple. L'eliminazione rimuoverà tutti i dati associati.
+              </p>
+            )}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel 

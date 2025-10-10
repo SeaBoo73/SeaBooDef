@@ -85,13 +85,7 @@ export default function CustomerDashboard() {
   // Delete account mutation
   const deleteAccountMutation = useMutation({
     mutationFn: async (password: string) => {
-      return await apiRequest('/api/users/me', {
-        method: 'DELETE',
-        body: JSON.stringify({ password }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      return await apiRequest('DELETE', '/api/users/me', { password });
     },
     onSuccess: () => {
       toast({
@@ -113,7 +107,10 @@ export default function CustomerDashboard() {
   });
 
   const handleDeleteAccount = () => {
-    if (!deletePassword) {
+    if (!user) return;
+    
+    // For email users, require password
+    if (user.authProvider === 'email' && !deletePassword) {
       toast({
         title: "Password richiesta",
         description: "Inserisci la tua password per confermare",
@@ -121,6 +118,7 @@ export default function CustomerDashboard() {
       });
       return;
     }
+    // For Apple users, password is empty (not required)
     deleteAccountMutation.mutate(deletePassword);
   };
 
@@ -511,17 +509,24 @@ export default function CustomerDashboard() {
                 Questa azione è permanente e non può essere annullata. Tutti i tuoi dati, 
                 prenotazioni e informazioni personali saranno eliminati definitivamente.
               </p>
-              <div className="space-y-2">
-                <Label htmlFor="delete-password">Inserisci la tua password per confermare:</Label>
-                <Input
-                  id="delete-password"
-                  type="password"
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="Password"
-                  data-testid="input-delete-password"
-                />
-              </div>
+              {user.authProvider === 'email' && (
+                <div className="space-y-2">
+                  <Label htmlFor="delete-password">Inserisci la tua password per confermare:</Label>
+                  <Input
+                    id="delete-password"
+                    type="password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    placeholder="Password"
+                    data-testid="input-delete-password"
+                  />
+                </div>
+              )}
+              {user.authProvider === 'apple' && (
+                <p className="text-sm text-gray-600">
+                  Il tuo account è collegato a Sign in with Apple. L'eliminazione rimuoverà tutti i dati associati.
+                </p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
