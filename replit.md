@@ -11,6 +11,16 @@ Version control: Sistema di backup automatico attivato per preservare ogni modif
 
 ## Recent Changes
 
+### October 10, 2025 - Apple Sign In JWT Verification (Security Fix)
+**Status:** Critical security bug fixed and verified
+- **CRITICAL FIX:** Implemented proper Apple JWT token verification using jose library
+- Integrated Apple JWKS endpoint (https://appleid.apple.com/auth/keys) for real-time public key verification
+- Removed insecure fallback to 'apple.user@icloud.com' - now extracts real user data from verified JWT payload
+- Added verifyAppleToken() function that validates tokens against Apple's issuer and app bundle ID (it.seaboo.app)
+- Fixed authProvider session management to preserve 'apple' vs 'email' authentication type correctly
+- Session now properly distinguishes Apple users from email users for account deletion flow
+- **Security compliance:** Meets Apple App Store authentication requirements with proper JWT verification
+
 ### October 10, 2025 - Account Deletion Feature Implementation (Apple Guideline 5.1.1v)
 **Status:** Fully implemented and reviewed
 - Implemented account deletion endpoint (DELETE /api/users/me) with password verification for security

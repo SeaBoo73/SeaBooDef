@@ -9,8 +9,27 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from 'url';
 import Stripe from "stripe";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Apple Sign In JWT verification
+const APPLE_JWKS_URI = 'https://appleid.apple.com/auth/keys';
+const APPLE_ISSUER = 'https://appleid.apple.com';
+const appleJWKS = createRemoteJWKSet(new URL(APPLE_JWKS_URI));
+
+async function verifyAppleToken(idToken: string) {
+  try {
+    const { payload } = await jwtVerify(idToken, appleJWKS, {
+      issuer: APPLE_ISSUER,
+      audience: 'it.seaboo.app', // Your app's bundle ID
+    });
+    return payload;
+  } catch (error) {
+    console.error('Apple token verification failed:', error);
+    throw new Error('Invalid Apple ID token');
+  }
+}
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -28,6 +47,7 @@ declare module 'express-session' {
       role: string;
       userType: string;
       businessName?: string;
+      authProvider?: string;
     };
   }
 }
@@ -87,7 +107,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: user.lastName || undefined,
         role: user.role || "customer",
         userType: user.role === "owner" ? "owner" : "customer",
-        businessName: user.businessName || undefined
+        businessName: user.businessName || undefined,
+        authProvider: user.authProvider
       };
 
       res.json({ 
@@ -129,7 +150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: user.lastName || undefined,
         role: user.role || "customer",
         userType: user.role === "owner" ? "owner" : "customer",
-        businessName: user.businessName || undefined
+        businessName: user.businessName || undefined,
+        authProvider: user.authProvider
       };
 
       res.json({ 
@@ -233,27 +255,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Token Apple mancante" });
       }
 
-      // In modalità review o development, accettiamo token mock
-      const isReviewMode = process.env.VITE_REVIEW_MODE === 'true' || id_token.startsWith('mock_');
+      // Verify Apple JWT token
+      const payload = await verifyAppleToken(id_token);
       
-      let email = '';
+      // Extract user data from verified JWT payload
+      const email = payload.email as string;
+      const appleUserId = payload.sub as string; // Apple's unique user identifier
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email non trovata nel token Apple" });
+      }
+
+      // Use user_info from Apple (only available on first sign-in)
       let firstName = '';
       let lastName = '';
 
-      if (isReviewMode) {
-        // Usa dati mock per review mode
-        email = user_info?.email || 'apple.user@icloud.com';
-        firstName = user_info?.name?.firstName || 'Apple';
-        lastName = user_info?.name?.lastName || 'User';
-      } else {
-        // TODO: In produzione, verifica il token Apple reale
-        // Per ora accettiamo i dati inviati dal client
-        email = user_info?.email || 'apple.user@icloud.com';
-        firstName = user_info?.name?.firstName || 'Apple';
-        lastName = user_info?.name?.lastName || 'User';
+      if (user_info?.name) {
+        firstName = user_info.name.firstName || '';
+        lastName = user_info.name.lastName || '';
       }
+      // Note: Apple only sends user_info on first sign-in
+      // On subsequent logins, firstName/lastName will be empty
+      // User can update their profile later if needed
 
-      // Controlla se l'utente esiste già
+      // Check if user already exists
       let user = await storage.getUserByEmail(email);
 
       if (!user) {
@@ -282,7 +307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: user.lastName || undefined,
         role: user.role || "customer",
         userType: user.role === "owner" ? "owner" : "customer",
-        businessName: user.businessName || undefined
+        businessName: user.businessName || undefined,
+        authProvider: user.authProvider
       };
 
       res.json({
