@@ -6,7 +6,19 @@ import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Link } from "wouter";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Link, useLocation } from "wouter";
 import { 
   User, 
   Settings, 
@@ -22,14 +34,57 @@ import {
   Star,
   MapPin,
   Bot,
-  MessageCircle
+  MessageCircle,
+  Trash2
 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProfiloPage() {
   const { user, logoutMutation } = useAuth();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
   
   const handleLogout = () => {
     logoutMutation.mutate();
+  };
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async (password: string) => {
+      return apiRequest("DELETE", "/api/users/me", { password });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account eliminato",
+        description: "Il tuo account è stato eliminato con successo",
+      });
+      setShowDeleteDialog(false);
+      setDeletePassword("");
+      // Redirect to home after deletion
+      setTimeout(() => setLocation("/"), 1000);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Errore",
+        description: error.message || "Password non corretta",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteAccount = () => {
+    if (!deletePassword) {
+      toast({
+        title: "Errore",
+        description: "Inserisci la password per confermare",
+        variant: "destructive",
+      });
+      return;
+    }
+    deleteAccountMutation.mutate(deletePassword);
   };
 
   const menuItems = [
@@ -293,19 +348,81 @@ export default function ProfiloPage() {
         </Card>
 
         {/* Logout */}
-        <Card>
+        <Card className="mb-6">
           <CardContent className="pt-6">
             <Button
               variant="outline"
               className="w-full text-red-600 border-red-200 hover:bg-red-50"
               onClick={handleLogout}
+              data-testid="button-logout"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Esci dall'account
             </Button>
           </CardContent>
         </Card>
+
+        {/* Delete Account */}
+        <Card>
+          <CardContent className="pt-6">
+            <Button
+              variant="outline"
+              className="w-full text-red-600 border-red-200 hover:bg-red-50"
+              onClick={() => setShowDeleteDialog(true)}
+              data-testid="button-delete-account"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Elimina account
+            </Button>
+            <p className="text-xs text-gray-500 text-center mt-2">
+              Questa azione è irreversibile
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Delete Account Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sei sicuro di voler eliminare il tuo account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Questa azione è irreversibile. Tutti i tuoi dati, prenotazioni e preferiti verranno eliminati permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Label htmlFor="delete-password">Conferma con la tua password</Label>
+            <Input
+              id="delete-password"
+              type="password"
+              placeholder="Inserisci la tua password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              className="mt-2"
+              data-testid="input-delete-password"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setDeletePassword("");
+              }}
+              data-testid="button-cancel-delete"
+            >
+              Annulla
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteAccountMutation.isPending}
+              data-testid="button-confirm-delete"
+            >
+              {deleteAccountMutation.isPending ? "Eliminazione..." : "Elimina account"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>
