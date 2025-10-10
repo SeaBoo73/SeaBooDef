@@ -11,6 +11,19 @@ Version control: Sistema di backup automatico attivato per preservare ogni modif
 
 ## Recent Changes
 
+### October 10, 2025 - Account Deletion Feature Implementation (Apple Guideline 5.1.1v)
+**Status:** Fully implemented and reviewed
+- Implemented account deletion endpoint (DELETE /api/users/me) with password verification for security
+- Added cascade delete functionality: automatically removes user's bookings before deleting account
+- Integrated Stripe customer deletion when user has payment records
+- Created user-friendly deletion dialog in profile page with confirmation and password input
+- **Critical bug fixes identified by architect review:**
+  - Fixed database schema mismatch: bookings.customerId and boatId changed from varchar to integer to match actual database structure
+  - Added robust password validation to prevent crashes and unauthorized deletions
+  - Fixed cascade delete logic to properly match database column types
+- Session automatically destroyed after successful account deletion with redirect to homepage
+- Complies with Apple App Store requirements for user data deletion
+
 ### October 2, 2025 - Critical Bug Fixes for Apple App Store Submission
 **Status:** App Store review issues resolved
 - Fixed database schema mismatch: aligned TypeScript enum with database user_role (customer/owner/admin)
