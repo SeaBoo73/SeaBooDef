@@ -19,6 +19,9 @@ Version control: Sistema di backup automatico attivato per preservare ogni modif
 - Added verifyAppleToken() function that validates tokens against Apple's issuer and app bundle ID (it.seaboo.app)
 - Fixed authProvider session management to preserve 'apple' vs 'email' authentication type correctly
 - Session now properly distinguishes Apple users from email users for account deletion flow
+- **Repeat login support:** Added appleUserId (Apple's stable 'sub' identifier) to database schema
+- Implemented getUserByAppleId() storage method for reliable user lookup across all logins
+- Fixed callback logic to support both first-time (with email) and repeat logins (appleUserId only)
 - **Security compliance:** Meets Apple App Store authentication requirements with proper JWT verification
 
 ### October 10, 2025 - Account Deletion Feature Implementation (Apple Guideline 5.1.1v)
