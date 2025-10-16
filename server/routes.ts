@@ -33,7 +33,7 @@ async function verifyAppleToken(idToken: string) {
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-10-28.acacia',
+  apiVersion: '2025-08-27.basil',
 });
 
 // Extend session type
@@ -103,12 +103,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.user = {
         id: user.id.toString(),
         email: user.email,
-        firstName: user.firstName || undefined,
-        lastName: user.lastName || undefined,
-        role: user.role || "customer",
+        firstName: user.firstName ?? undefined,
+        lastName: user.lastName ?? undefined,
+        role: user.role ?? "customer",
         userType: user.role === "owner" ? "owner" : "customer",
-        businessName: user.businessName || undefined,
-        authProvider: user.authProvider
+        businessName: user.businessName ?? undefined,
+        authProvider: user.authProvider ?? undefined
       };
 
       res.json({ 
@@ -146,12 +146,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.user = {
         id: user.id.toString(),
         email: user.email,
-        firstName: user.firstName || undefined,
-        lastName: user.lastName || undefined,
-        role: user.role || "customer",
+        firstName: user.firstName ?? undefined,
+        lastName: user.lastName ?? undefined,
+        role: user.role ?? "customer",
         userType: user.role === "owner" ? "owner" : "customer",
-        businessName: user.businessName || undefined,
-        authProvider: user.authProvider
+        businessName: user.businessName ?? undefined,
+        authProvider: user.authProvider ?? undefined
       };
 
       res.json({ 
@@ -161,7 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
-          role: user.role || "customer",
+          role: user.role ?? "customer",
           userType: user.role === "owner" ? "owner" : "customer"
         }
       });
@@ -255,6 +255,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Token Apple mancante" });
       }
 
+      // Security: Block mock/fake tokens explicitly
+      if (id_token.startsWith('mock_') || id_token.includes('mock')) {
+        console.error('🚫 Blocked mock Apple token attempt');
+        return res.status(403).json({ 
+          error: "Token Apple non valido. Usa una vera autenticazione Apple." 
+        });
+      }
+
       console.log('🍎 Apple Sign In callback - user_info:', user_info ? 'present' : 'missing');
 
       // Verify Apple JWT token
@@ -312,12 +320,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.user = {
         id: user.id.toString(),
         email: user.email,
-        firstName: user.firstName || undefined,
-        lastName: user.lastName || undefined,
-        role: user.role || "customer",
+        firstName: user.firstName ?? undefined,
+        lastName: user.lastName ?? undefined,
+        role: user.role ?? "customer",
         userType: user.role === "owner" ? "owner" : "customer",
-        businessName: user.businessName || undefined,
-        authProvider: user.authProvider
+        businessName: user.businessName ?? undefined,
+        authProvider: user.authProvider ?? undefined
       };
 
       res.json({

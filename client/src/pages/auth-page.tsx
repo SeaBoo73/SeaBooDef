@@ -64,7 +64,7 @@ export default function AuthPage() {
     const urlParams = new URLSearchParams(window.location.search);
     // Get role from URL parameter, defaulting to "customer"
     const roleParam = urlParams.get('role');
-    const role = (roleParam === 'owner') ? "owner" as const : "user" as const;
+    const role = (roleParam === 'owner') ? "owner" as const : "customer" as const;
     
     return {
       username: "",
@@ -151,22 +151,18 @@ export default function AuthPage() {
           user_info: response.user
         });
       } else {
-        // Development/testing fallback
-        console.log('🧪 Development mode - using mock Apple Sign In');
+        // Error: Apple Sign In not available
+        console.error('❌ Apple Sign In not available - Neither Capacitor plugin nor Web SDK found');
+        console.error('Platform:', Capacitor.getPlatform(), 'isNative:', Capacitor.isNativePlatform());
+        console.error('AppleID SDK loaded:', typeof window !== 'undefined' && !!window.AppleID);
         
-        const mockAppleData = {
-          id_token: 'mock_apple_id_token_' + Date.now(),
-          user_info: {
-            userIdentifier: 'mock_user_' + Date.now(),
-            email: 'apple.user@icloud.com',
-            name: {
-              firstName: 'Apple',
-              lastName: 'User'
-            }
-          }
-        };
+        toast({
+          title: "Servizio Non Disponibile",
+          description: "Sign in with Apple non è disponibile al momento. Usa email e password per accedere.",
+          variant: "destructive",
+        });
         
-        appleLoginMutation.mutate(mockAppleData);
+        throw new Error('Apple Sign In not configured properly - no valid authentication method available');
       }
     } catch (error: any) {
       console.error('❌ Apple Sign In error:', error);
@@ -368,19 +364,19 @@ export default function AuthPage() {
                         {/* Cliente Option */}
                         <div 
                           className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                            registerForm.watch("role") === "user" 
+                            registerForm.watch("role") === "customer" 
                               ? "border-ocean-blue bg-blue-50" 
                               : "border-gray-200 hover:border-gray-300"
                           }`}
-                          onClick={() => registerForm.setValue("role", "user")}
+                          onClick={() => registerForm.setValue("role", "customer")}
                         >
                           <div className="flex items-center space-x-3">
                             <div className={`w-4 h-4 rounded-full border-2 ${
-                              registerForm.watch("role") === "user" 
+                              registerForm.watch("role") === "customer" 
                                 ? "border-ocean-blue bg-ocean-blue" 
                                 : "border-gray-300"
                             }`}>
-                              {registerForm.watch("role") === "user" && (
+                              {registerForm.watch("role") === "customer" && (
                                 <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
                               )}
                             </div>
@@ -493,7 +489,7 @@ export default function AuthPage() {
                     )}
 
                     {/* Payment Methods Info for Customers */}
-                    {registerForm.watch("role") === "user" && (
+                    {registerForm.watch("role") === "customer" && (
                       <div className="space-y-4 border-t pt-4">
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                           <h3 className="font-medium text-green-900 mb-2">💳 Metodi di Pagamento</h3>
