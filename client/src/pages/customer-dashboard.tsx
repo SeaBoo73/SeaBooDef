@@ -144,13 +144,10 @@ export default function CustomerDashboard() {
   });
 
   const handleOpenEditDialog = () => {
-    console.log("🔵🔵🔵 CLICK REGISTRATO SU MODIFICA PROFILO! 🔵🔵🔵");
-    console.log("🔵 User data:", user);
-    alert("Click registrato! Apertura dialog...");
+    console.log("🔵 Opening edit profile dialog");
     
     if (!user) {
-      console.log("❌ Errore: user non definito");
-      alert("ERRORE: user non definito!");
+      console.error("❌ Error: user is undefined");
       return;
     }
     
@@ -160,9 +157,7 @@ export default function CustomerDashboard() {
       phone: user.phone || "",
     });
     
-    console.log("✅ Setting showEditDialog to TRUE");
     setShowEditDialog(true);
-    console.log("✅ showEditDialog is now:", true);
   };
 
   const handleUpdateProfile = () => {

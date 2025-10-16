@@ -205,14 +205,22 @@ export default function AuthPage() {
             <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
               <TabsTrigger 
                 value="login" 
-                className="data-[state=active]:bg-ocean-blue data-[state=active]:text-white data-[state=inactive]:text-gray-600 data-[state=active]:shadow-md font-semibold transition-all duration-200 hover:text-ocean-blue"
+                className={`font-semibold transition-all duration-200 ${
+                  activeTab === 'login' 
+                    ? 'bg-ocean-blue text-white shadow-md' 
+                    : 'text-gray-600 hover:text-ocean-blue'
+                }`}
                 data-testid="tab-login"
               >
                 Accedi
               </TabsTrigger>
               <TabsTrigger 
                 value="register"
-                className="data-[state=active]:bg-ocean-blue data-[state=active]:text-white data-[state=inactive]:text-gray-600 data-[state=active]:shadow-md font-semibold transition-all duration-200 hover:text-ocean-blue"
+                className={`font-semibold transition-all duration-200 ${
+                  activeTab === 'register' 
+                    ? 'bg-ocean-blue text-white shadow-md' 
+                    : 'text-gray-600 hover:text-ocean-blue'
+                }`}
                 data-testid="tab-register"
               >
                 Registrati
