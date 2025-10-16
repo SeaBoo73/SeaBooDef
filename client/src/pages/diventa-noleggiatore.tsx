@@ -32,11 +32,11 @@ export default function DiventaNoleggiatorePage() {
 
   const handleProceed = () => {
     if (acceptedTerms && acceptedCommission && acceptedRequirements) {
-      if (user) {
-        // User logged in, redirect to owner dashboard
+      if (user?.role === "owner") {
+        // User is already an owner, redirect to owner dashboard
         setLocation("/owner-dashboard");
       } else {
-        // User not logged in, redirect to registration
+        // User not logged in OR logged as customer, redirect to owner registration
         setLocation("/auth?tab=register&role=owner");
       }
     }
