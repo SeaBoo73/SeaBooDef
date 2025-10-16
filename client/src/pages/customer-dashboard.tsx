@@ -144,12 +144,17 @@ export default function CustomerDashboard() {
   });
 
   const handleOpenEditDialog = () => {
-    if (!user) return;
+    console.log("🔵 Click su Modifica Profilo - user:", user);
+    if (!user) {
+      console.log("❌ Errore: user non definito");
+      return;
+    }
     setEditFormData({
       firstName: user.firstName || "",
       lastName: user.lastName || "",
       phone: user.phone || "",
     });
+    console.log("✅ Apertura dialog, showEditDialog:", true);
     setShowEditDialog(true);
   };
 
