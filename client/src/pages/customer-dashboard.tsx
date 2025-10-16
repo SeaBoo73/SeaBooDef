@@ -144,18 +144,25 @@ export default function CustomerDashboard() {
   });
 
   const handleOpenEditDialog = () => {
-    console.log("🔵 Click su Modifica Profilo - user:", user);
+    console.log("🔵🔵🔵 CLICK REGISTRATO SU MODIFICA PROFILO! 🔵🔵🔵");
+    console.log("🔵 User data:", user);
+    alert("Click registrato! Apertura dialog...");
+    
     if (!user) {
       console.log("❌ Errore: user non definito");
+      alert("ERRORE: user non definito!");
       return;
     }
+    
     setEditFormData({
       firstName: user.firstName || "",
       lastName: user.lastName || "",
       phone: user.phone || "",
     });
-    console.log("✅ Apertura dialog, showEditDialog:", true);
+    
+    console.log("✅ Setting showEditDialog to TRUE");
     setShowEditDialog(true);
+    console.log("✅ showEditDialog is now:", true);
   };
 
   const handleUpdateProfile = () => {
