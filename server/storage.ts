@@ -24,6 +24,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByAppleId(appleUserId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined>;
   verifyPassword(email: string, password: string): Promise<User | null>;
   deleteUser(id: number): Promise<boolean>;
   sessionStore: session.Store;
@@ -96,6 +97,18 @@ export class DatabaseStorage implements IStorage {
 
     const isValid = await bcrypt.compare(password, user.password);
     return isValid ? user : null;
+  }
+
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
+    // Don't allow password updates through this method (use separate change password endpoint)
+    const { password, ...updateData } = userData;
+    
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    return user;
   }
 
   async deleteUser(id: number): Promise<boolean> {

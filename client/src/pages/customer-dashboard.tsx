@@ -19,6 +19,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Booking, Boat } from "@shared/schema";
@@ -53,6 +61,12 @@ export default function CustomerDashboard() {
   const { toast } = useToast();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+  });
 
   // Get tab from URL parameter
   const urlParams = new URLSearchParams(window.location.search);
@@ -82,6 +96,29 @@ export default function CustomerDashboard() {
   // TODO: Fetch boats for favorites (disabled until favorites table exists)
   const boats: Boat[] = [];
 
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: typeof editFormData) => {
+      return await apiRequest('PUT', '/api/profile', data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profilo aggiornato",
+        description: "Le tue informazioni sono state salvate con successo",
+      });
+      setShowEditDialog(false);
+      // Refresh page to update user data
+      window.location.reload();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Errore",
+        description: error.message || "Non è stato possibile aggiornare il profilo",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete account mutation
   const deleteAccountMutation = useMutation({
     mutationFn: async (password: string) => {
@@ -105,6 +142,20 @@ export default function CustomerDashboard() {
       });
     },
   });
+
+  const handleOpenEditDialog = () => {
+    if (!user) return;
+    setEditFormData({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      phone: user.phone || "",
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleUpdateProfile = () => {
+    updateProfileMutation.mutate(editFormData);
+  };
 
   const handleDeleteAccount = () => {
     if (!user) return;
@@ -471,7 +522,13 @@ export default function CustomerDashboard() {
                 </div>
                 
                 <div className="pt-4 flex gap-3">
-                  <Button variant="outline">Modifica profilo</Button>
+                  <Button 
+                    variant="outline"
+                    onClick={handleOpenEditDialog}
+                    data-testid="button-edit-profile"
+                  >
+                    Modifica profilo
+                  </Button>
                   <Button 
                     variant="destructive" 
                     onClick={() => setShowDeleteDialog(true)}
@@ -498,6 +555,66 @@ export default function CustomerDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Modifica profilo</DialogTitle>
+            <DialogDescription>
+              Aggiorna le tue informazioni personali
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-firstName">Nome</Label>
+              <Input
+                id="edit-firstName"
+                value={editFormData.firstName}
+                onChange={(e) => setEditFormData({ ...editFormData, firstName: e.target.value })}
+                placeholder="Il tuo nome"
+                data-testid="input-edit-firstname"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-lastName">Cognome</Label>
+              <Input
+                id="edit-lastName"
+                value={editFormData.lastName}
+                onChange={(e) => setEditFormData({ ...editFormData, lastName: e.target.value })}
+                placeholder="Il tuo cognome"
+                data-testid="input-edit-lastname"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-phone">Telefono</Label>
+              <Input
+                id="edit-phone"
+                value={editFormData.phone}
+                onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                placeholder="+39 123 456 7890"
+                data-testid="input-edit-phone"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowEditDialog(false)}
+              data-testid="button-cancel-edit"
+            >
+              Annulla
+            </Button>
+            <Button
+              onClick={handleUpdateProfile}
+              disabled={updateProfileMutation.isPending}
+              data-testid="button-save-profile"
+            >
+              {updateProfileMutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Account Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

@@ -368,6 +368,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.put("/api/profile", requireAuth, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.session.user.id);
+      const { firstName, lastName, phone, businessName, businessType, vatNumber, website, instagram } = req.body;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        firstName,
+        lastName,
+        phone,
+        businessName,
+        businessType,
+        vatNumber,
+        website,
+        instagram
+      });
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "Utente non trovato" });
+      }
+
+      // Update session with new data
+      req.session.user.firstName = updatedUser.firstName ?? undefined;
+      req.session.user.lastName = updatedUser.lastName ?? undefined;
+      req.session.user.businessName = updatedUser.businessName ?? undefined;
+
+      // Don't send password
+      const { password, ...userProfile } = updatedUser;
+      res.json({ success: true, user: userProfile });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      res.status(500).json({ error: "Errore nell'aggiornamento del profilo" });
+    }
+  });
+
   // Multer setup for file uploads
   const upload = multer({
     dest: 'uploads/',
