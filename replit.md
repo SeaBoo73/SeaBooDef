@@ -11,6 +11,51 @@ Version control: Sistema di backup automatico attivato per preservare ogni modif
 
 ## Recent Changes
 
+### October 16, 2025 - Apple App Store Rejection Fix: Random Account Bug (Guideline 2.1)
+**Status:** CRITICAL BUG FIXED - Ready for App Store resubmission
+**Apple Rejection Reason:** "When tapping 'Sign in with Apple', app creates random/wrong account instead of authenticating the correct Apple ID user."
+
+**ROOT CAUSE IDENTIFIED:**
+- Frontend had a development fallback that created MOCK Apple credentials when the native plugin/Web SDK was unavailable
+- Mock credentials used random timestamp-based IDs: `mock_user_${Date.now()}` → created new "random" account on every login
+- Apple's review environment triggered this fallback, causing the exact behavior they reported
+
+**CRITICAL FIXES APPLIED:**
+1. **Removed Mock Fallback (client/src/pages/auth-page.tsx):**
+   - Completely eliminated development fallback that created fake Apple credentials
+   - Replaced with explicit error message when Apple Sign In unavailable
+   - Now shows: "Sign in with Apple non è disponibile. Usa email/password per accedere."
+   - Prevents any account creation without valid Apple authentication
+
+2. **Backend Security Enhancement (server/routes.ts):**
+   - Added explicit mock token blocking: rejects tokens containing 'mock_'
+   - Returns 403 error for any fake authentication attempts
+   - Double-layer protection against invalid credentials
+
+3. **Role Schema Fix:**
+   - Changed all frontend references from "user" to "customer" to match database schema
+   - Fixed TypeScript errors preventing successful compilation
+   - Ensures proper user role assignment
+
+4. **Type Safety Improvements:**
+   - Updated Stripe API version to latest (2025-08-27.basil)
+   - Fixed null/undefined type mismatches in session management
+   - Improved error handling throughout auth flow
+
+**VERIFICATION:**
+- ✅ Build completed successfully
+- ✅ Capacitor iOS sync completed with Apple Sign In plugin detected
+- ✅ No LSP errors remaining
+- ✅ Frontend platform detection working: iOS native → Capacitor plugin, Web → Web SDK
+- ✅ Backend JWT verification validates all tokens against Apple JWKS
+- ✅ getUserByAppleId() properly matches existing users on repeat logins
+
+**APP STORE COMPLIANCE:**
+- Apple Sign In now uses ONLY real Apple credentials (no mocks/fallbacks)
+- Proper error handling when authentication unavailable
+- Conforms to Guideline 2.1 - App Completeness requirements
+- Ready for resubmission to App Store
+
 ### October 10, 2025 - Apple Sign In JWT Verification & iOS/iPadOS Support (Critical Fix)
 **Status:** Production-ready and verified for iOS/iPadOS 26.0.1
 - **CRITICAL FIX:** Implemented proper Apple JWT token verification using jose library
