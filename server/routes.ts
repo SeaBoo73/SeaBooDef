@@ -111,18 +111,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authProvider: user.authProvider ?? undefined
       };
 
-      res.json({ 
-        success: true, 
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          userType: user.role === "owner" ? "owner" : "customer",
-          businessName: user.businessName
-        },
-        redirectTo: role === "owner" ? "/owner/dashboard" : "/home"
+      // Save session before responding to ensure it's persisted
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ error: "Errore durante il salvataggio della sessione" });
+        }
+        
+        res.json({ 
+          success: true, 
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            userType: user.role === "owner" ? "owner" : "customer",
+            businessName: user.businessName
+          },
+          redirectTo: role === "owner" ? "/owner/dashboard" : "/home"
+        });
       });
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -154,16 +162,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authProvider: user.authProvider ?? undefined
       };
 
-      res.json({ 
-        success: true, 
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role ?? "customer",
-          userType: user.role === "owner" ? "owner" : "customer"
+      // Save session before responding to ensure it's persisted
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ error: "Errore durante il salvataggio della sessione" });
         }
+        
+        res.json({ 
+          success: true, 
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role ?? "customer",
+            userType: user.role === "owner" ? "owner" : "customer"
+          }
+        });
       });
     } catch (error: any) {
       console.error("Login error:", error);
@@ -328,15 +344,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authProvider: user.authProvider ?? undefined
       };
 
-      res.json({
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          userType: user.role === "owner" ? "owner" : "customer"
+      // Save session before responding to ensure it's persisted
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ error: "Errore durante il salvataggio della sessione" });
         }
+        
+        res.json({
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            userType: user.role === "owner" ? "owner" : "customer"
+          }
+        });
       });
     } catch (error: any) {
       console.error("Apple Sign In error:", error);
